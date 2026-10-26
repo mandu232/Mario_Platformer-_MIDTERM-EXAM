@@ -54,8 +54,8 @@ You can also open `Assets/Scenes/Stage2.unity` to test the second stage directly
 
 ## Gameplay Videos
 
-- **Full Gameplay:** Link coming soon.
-- **1-Minute Gameplay:** Link coming soon.
+- **Full Gameplay:** [Link](https://youtu.be/VNuTEuWiBik)
+- **1-Minute Gameplay:** [Link](https://youtu.be/U_pOs7detts)
 
 ## Asset Credits
 
