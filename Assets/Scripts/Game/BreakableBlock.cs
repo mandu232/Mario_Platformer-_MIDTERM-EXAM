@@ -10,7 +10,7 @@ namespace Midterm
     {
 
         
-        [SerializeField] Sprite[] fragmentSprites;
+        [SerializeField] BlockBreakEffect breakEffectPrefab;
 
 
         Tilemap sourceMap;
@@ -60,35 +60,9 @@ namespace Midterm
             var visual = GetComponent<SpriteRenderer>();
 
 
-            //파괴시 파편생성
-            for (int i = 0; i < 4; i++)
-            {
-                var piece = new GameObject("BlockFragment", typeof(SpriteRenderer), typeof(Rigidbody2D));
-                piece.transform.position = transform.position + new Vector3(i % 2 == 0 ? -0.15f : 0.15f, i < 2 ? -0.15f : 0.15f, 0);
-                var sprite = piece.GetComponent<SpriteRenderer>();
-
-
-
-                sprite.sprite = fragmentSprites[i % fragmentSprites.Length];
-                sprite.sharedMaterial = visual.sharedMaterial;
-                sprite.sortingLayerID = visual.sortingLayerID;
-                sprite.sortingOrder = visual.sortingOrder + 1;
-
-
-
-                var body = piece.GetComponent<Rigidbody2D>();
-                float direction = i % 2 == 0 ? -1 : 1;
-
-
-
-                body.gravityScale = 2;
-                body.linearVelocity = new Vector2(direction * (i < 2 ? 2.5f : 4f), i < 2 ? 4f : 6f);
-                body.angularVelocity = direction * 300f;
-
-                Destroy(piece, 2f);
-            }
-
-
+            var effect = Instantiate(breakEffectPrefab, transform.position, Quaternion.identity);
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(effect.gameObject, gameObject.scene);
+            effect.Play(visual);
 
             if (sourceMap != null) 
             {

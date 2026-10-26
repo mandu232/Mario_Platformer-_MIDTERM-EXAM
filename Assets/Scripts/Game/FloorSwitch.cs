@@ -46,6 +46,7 @@ namespace Midterm
             }
 
             IsPressed = true;
+            GameAudio.Play(GameSound.SwitchPress);
             visual.sprite = pressedSprite;
             targetTilemap.ClearAllTiles();
 

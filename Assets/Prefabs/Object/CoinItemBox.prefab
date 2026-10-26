@@ -154,8 +154,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Midterm.ItemBox
   itemPrefab: {fileID: 0}
   givesCoin: 1
-  coinSprite: {fileID: 3463711417647429333, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
+  bumpPrefab: {fileID: 7767957183909663971, guid: 40b688f0994a60b41924cce1fed7a4ac, type: 3}
+  coinPopPrefab: {fileID: 4739927116602104075, guid: 2d4d0ef2d7717414c9c0af70ff119f2f, type: 3}
   usedSprite: {fileID: 3400160013776356846, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
   bumpHeight: 0.18
   bumpDuration: 0.18
   emergeDuration: 0.4
+  coinPopDuration: 0.6
+  coinPopHeight: 1.2

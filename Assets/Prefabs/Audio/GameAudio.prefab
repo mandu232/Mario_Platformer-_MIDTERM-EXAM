@@ -65,6 +65,8 @@ MonoBehaviour:
   enemyDeath: {fileID: 8300000, guid: 7a1d72276d9d2b74eba4eb783c35d994, type: 3}
   blockBreak: {fileID: 8300000, guid: 6c2e2902824306e4ea7fe42255752b10, type: 3}
   fireballBounce: {fileID: 8300000, guid: a901b8f6d9047e14f84a406ed9dea88d, type: 3}
+  checkpoint: {fileID: 8300000, guid: 290be9629dcec7c458acdfc327b77a12, type: 3}
+  switchPress: {fileID: 8300000, guid: 6c2e2902824306e4ea7fe42255752b10, type: 3}
 --- !u!1 &4407474966476356531
 GameObject:
   m_ObjectHideFlags: 0

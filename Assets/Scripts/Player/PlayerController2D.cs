@@ -23,7 +23,9 @@ namespace Midterm
         float invulnerableUntil;
         float knockbackUntil;
         float hitTime;
+
         Color normalColor;
+
         public bool IsInvulnerable => Time.time < invulnerableUntil;
         public bool IsControlLocked { get; private set; }
         public bool IsDead { get; private set; }
@@ -70,16 +72,28 @@ namespace Midterm
             ReceiveHit(new Vector2(0, upwardSpeed));
         }
 
-        void ReceiveHit(Vector2 velocity)
+        public void ReceiveBossHit(Vector2 bossPosition, Vector2 knockback, float protectionDuration)
         {
-            if (IsControlLocked || IsInvulnerable || CurrentHealth <= 0)
+            float direction = transform.position.x < bossPosition.x ? -1 : 1;
+            ReceiveHit(new Vector2(direction * knockback.x, knockback.y), protectionDuration);
+        }
+
+        void ReceiveHit(Vector2 velocity, float protectionDuration = 0)
+        {
+            if (!isActiveAndEnabled || IsControlLocked || IsInvulnerable || CurrentHealth <= 0)
             {
                 return;
             }
             hitTime = Time.time;
-            invulnerableUntil = Time.time + invulnerabilityDuration;
+            invulnerableUntil = Time.time + Mathf.Max(invulnerabilityDuration, protectionDuration);
             knockbackUntil = Time.time + knockbackDuration;
-            TakeDamage(1);
+            if (IsPoweredUp)
+            {
+                IsPoweredUp = false;
+                animationTime = 0;
+                GameAudio.Play(GameSound.Hit);
+            }
+            else TakeDamage(1);
             if (IsDead)
             {
                 return;
@@ -96,6 +110,7 @@ namespace Midterm
 
         public void TakeDamage(int amount)
         {
+            if (!isActiveAndEnabled || IsDead) return;
             if (amount > 0) SetHealth(CurrentHealth - Mathf.Min(amount, CurrentHealth));
         }
 
@@ -133,9 +148,13 @@ namespace Midterm
             {
                 return;
             }
+
             SetControlLocked(false);
+
             IsDead = true;
+
             GameAudio.Play(GameSound.Death);
+            
             horizontal = jumpTime = 0;
             jumpPressed = jumpHeld = false;
             invulnerableUntil = knockbackUntil = 0;
@@ -152,6 +171,7 @@ namespace Midterm
             {
                 return;
             }
+
             body.linearVelocity = Vector2.zero;
             body.angularVelocity = 0;
             body.position = position;
@@ -160,6 +180,23 @@ namespace Midterm
             jumpTime = animationTime = 0;
             bouncing = false;
             knockbackUntil = 0;
+        }
+
+        public void Revive(Vector3 position)
+        {
+            SetControlLocked(false);
+            IsDead = IsPoweredUp = false;
+            enabled = true;
+            body.simulated = true;
+            body.gravityScale = initialGravityScale;
+            body.constraints = initialConstraints;
+            playerCollider.enabled = true;
+            Respawn(position);
+            invulnerableUntil = Time.time + invulnerabilityDuration;
+            hitTime = Time.time;
+            CurrentHealth = MaxHealth;
+            visual.color = normalColor;
+            HealthChanged?.Invoke(CurrentHealth, MaxHealth);
         }
 
         public void Bounce(float speed)
@@ -186,6 +223,8 @@ namespace Midterm
         bool jumpHeld;
         bool grounded;
         bool bouncing;
+        float initialGravityScale;
+        RigidbodyConstraints2D initialConstraints;
 
         void Awake()
         {
@@ -193,6 +232,8 @@ namespace Midterm
             body = GetComponent<Rigidbody2D>();
             playerCollider = GetComponent<Collider2D>();
             visual = GetComponent<SpriteRenderer>();
+            initialGravityScale = body.gravityScale;
+            initialConstraints = body.constraints;
             normalColor = visual.color;
             groundFilter = new ContactFilter2D { useTriggers = false };
         }

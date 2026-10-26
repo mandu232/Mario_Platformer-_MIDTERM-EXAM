@@ -17,11 +17,21 @@ namespace Midterm
         [SerializeField, Min(0)] float bobSpeed = 3f;
         [SerializeField, Min(0.01f)] float frameDuration = 0.14f;
         [SerializeField, Min(0)] float bounceSpeed = 8f;
+        [SerializeField] PlayerController2D player;
+        [SerializeField, Min(.1f)] float detectionRange = 5f;
+        [SerializeField, Min(.1f)] float diveSpeed = 8f;
+        [SerializeField, Min(.1f)] float returnSpeed = 4f;
+        [SerializeField, Min(.1f)] float attackCooldown = 2f;
+
+        public enum AttackState { Patrolling, Diving, Returning }
+        public AttackState State { get; private set; }
+
+        Vector2 diveTarget;
+        float attackTimer;
 
         Rigidbody2D body;
         BoxCollider2D hitbox;
         SpriteRenderer visual;
-
 
         Vector2 origin;
 
@@ -45,7 +55,17 @@ namespace Midterm
 
 
 
-        void Start() => origin = body.position;
+        void Start()
+        {
+            origin = body.position;
+            if (player == null)
+                foreach (var root in gameObject.scene.GetRootGameObjects())
+                {
+                    player = root.GetComponentInChildren<PlayerController2D>();
+                    if (player != null) break;
+                }
+            attackTimer = attackCooldown;
+        }
 
 
 
@@ -58,6 +78,37 @@ namespace Midterm
 
 
             flightTime += Time.fixedDeltaTime;
+            attackTimer = Mathf.Max(0, attackTimer - Time.fixedDeltaTime);
+            if (State == AttackState.Diving)
+            {
+                body.linearVelocity = Vector2.ClampMagnitude((diveTarget - body.position) / Time.fixedDeltaTime, diveSpeed);
+                direction = diveTarget.x > body.position.x ? 1 : -1;
+                if ((diveTarget - body.position).sqrMagnitude < .04f || attackTimer <= 0 ||
+                    player == null || player.IsDead || !player.enabled)
+                    BeginReturn();
+                return;
+            }
+            if (State == AttackState.Returning)
+            {
+                body.linearVelocity = Vector2.ClampMagnitude((origin - body.position) / Time.fixedDeltaTime, returnSpeed);
+                if ((origin - body.position).sqrMagnitude < .01f)
+                {
+                    State = AttackState.Patrolling;
+                    attackTimer = attackCooldown;
+                }
+                return;
+            }
+            if (attackTimer <= 0 && player != null && player.enabled && !player.IsDead && !player.IsControlLocked)
+            {
+                Vector2 delta = (Vector2)player.transform.position - body.position;
+                if (Mathf.Abs(delta.x) <= detectionRange && delta.y < -.2f && delta.y > -detectionRange * 2)
+                {
+                    diveTarget = player.transform.position;
+                    State = AttackState.Diving;
+                    attackTimer = 2f;
+                    return;
+                }
+            }
 
             if (body.position.x <= origin.x - patrolDistance) direction = 1;
 
@@ -117,6 +168,12 @@ namespace Midterm
 
         void OnCollisionStay2D(Collision2D collision) => HandleCollision(collision);
 
+        void BeginReturn()
+        {
+            State = AttackState.Returning;
+            body.linearVelocity = Vector2.zero;
+        }
+
         void HandleCollision(Collision2D collision)
         {
             if (IsDying)
@@ -125,6 +182,7 @@ namespace Midterm
             }
 
             var player = collision.gameObject.GetComponent<PlayerController2D>();
+            if (State == AttackState.Diving) BeginReturn();
 
             for (int i = 0; i < collision.contactCount; i++)
             {

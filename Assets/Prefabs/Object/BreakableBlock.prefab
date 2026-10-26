@@ -152,6 +152,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dc39d077d210634c96828f03a069df8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Midterm.BreakableBlock
-  fragmentSprites:
-  - {fileID: 4755373664117421245, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
-  - {fileID: 778136270091268006, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
+  breakEffectPrefab: {fileID: 48981833122628714, guid: ac58a4358a81b2742807a9ede12df158, type: 3}

@@ -13,6 +13,13 @@ namespace Midterm
         [SerializeField] Image[] coinDigits;
         
         GameManager manager;
+        [SerializeField] SessionHudView sessionHud;
+        [SerializeField] ResultScreenView resultScreen;
+        public UnityEngine.UI.Text ResultTitle => resultScreen.Title;
+
+        public void RefreshSession(int lives, int score, int seconds) => sessionHud.Refresh(lives, score, seconds);
+        public void ShowResult(string title, string details, bool retry) => resultScreen.Show(title, details, retry);
+        public void HideResult() => resultScreen.Hide();
 
         // AiCode -------
         public void BindCoins(GameManager target)

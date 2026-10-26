@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 
 namespace Midterm
 {
-    public sealed class JumpPadTile : Tile
+    public sealed class JumpPadTile : PrefabTile
     {
         // AiCode -------
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)

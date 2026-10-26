@@ -9,9 +9,10 @@ namespace Midterm
 
         [SerializeField, Min(0.1f)] float centerWidth = 3f;
 
-        public bool IsTriggered { 
+        public bool IsTriggered 
+        { 
             get; private set; 
-            }
+        }
 
 
 

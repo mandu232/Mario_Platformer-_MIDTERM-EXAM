@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 
 namespace Midterm
 {
-    public sealed class ItemBoxTile : Tile
+    public sealed class ItemBoxTile : PrefabTile
     {
         // AiCode -------
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData data)
@@ -29,6 +29,7 @@ namespace Midterm
         // AiCode -------
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject instance)
         {
+            base.StartUp(position, tilemap, instance);
             
             if (Application.isPlaying && instance != null)
             {

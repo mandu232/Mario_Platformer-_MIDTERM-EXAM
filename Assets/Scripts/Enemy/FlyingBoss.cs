@@ -25,6 +25,10 @@ namespace Midterm
         [SerializeField] PlayerController2D player;
         [SerializeField] BossHealthHud bossHud;
         [SerializeField] FollowCamera impactCamera;
+        [SerializeField] SpriteRenderer visual;
+        [SerializeField] SpriteMask emergenceMaskPrefab;
+        [SerializeField] Vector2 contactKnockback = new Vector2(3f, 4f);
+        [SerializeField, Min(0.1f)] float contactInvulnerability = 2f;
 
         [SerializeField] bool waitForRoomTrigger;
         [SerializeField, Min(0.1f)] float emergenceDuration = 1.2f;
@@ -45,6 +49,7 @@ namespace Midterm
         [SerializeField, Min(0.1f)] float recoverySpeed = 4f;
         [SerializeField, Min(0.1f)] float fallGravity = 3f;
         [SerializeField, Min(0)] float stompBounceSpeed = 10f;
+        [SerializeField] FlowerPickup stompFlowerPrefab;
         [SerializeField, Range(0.1f, 1f)] float airborneColliderScale = 0.8f;
         [SerializeField, Range(0.1f, 1f)] float stunnedColliderScale = 0.55f;
         [SerializeField, Min(0)] float groundEmbedDepth = 0.2f;
@@ -58,16 +63,17 @@ namespace Midterm
 
         Rigidbody2D body;
         CircleCollider2D hitbox;
-        SpriteRenderer visual;
         Vector2 home;
         Vector2 chargeDirection;
         Vector2 emergenceStart;
-        GameObject emergenceMask;
-        Sprite emergenceMaskSprite;
+        SpriteMask emergenceMask;
 
         int combatSortingLayer;
         int combatSortingOrder;
         bool entranceLocksPlayer;
+        bool droppedStompFlower;
+        Collider2D protectedPlayerCollider;
+        Coroutine contactProtection;
 
         //스프라이트 없을때 사용
         //사용안함
@@ -177,17 +183,15 @@ namespace Midterm
         // AiCode -----
         void CreateEmergenceMask(float floorY)
         {
-            emergenceMaskSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), Vector2.one * 0.5f, 1);
-            emergenceMask = new GameObject("BossEmergenceMask", typeof(SpriteMask));
+            emergenceMask = Instantiate(emergenceMaskPrefab);
 
-            SceneManager.MoveGameObjectToScene(emergenceMask, gameObject.scene);
+            SceneManager.MoveGameObjectToScene(emergenceMask.gameObject, gameObject.scene);
 
             float height = Mathf.Max(10, home.y - floorY + 8);
 
             emergenceMask.transform.position = new Vector3(home.x, floorY + height * 0.5f, transform.position.z);
             emergenceMask.transform.localScale = new Vector3(visual.bounds.size.x + 4, height, 1);
 
-            emergenceMask.GetComponent<SpriteMask>().sprite = emergenceMaskSprite;
             visual.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
         //--------------
@@ -213,9 +217,7 @@ namespace Midterm
                 visual.sortingOrder = combatSortingOrder;
             }
 
-            if (emergenceMask != null) Destroy(emergenceMask);
-
-            if (emergenceMaskSprite != null) Destroy(emergenceMaskSprite);
+            if (emergenceMask != null) Destroy(emergenceMask.gameObject);
         }
 
         // AiCode ----
@@ -224,26 +226,8 @@ namespace Midterm
             body = GetComponent<Rigidbody2D>();
             hitbox = GetComponent<CircleCollider2D>();
 
-            var sourceVisual = GetComponent<SpriteRenderer>();
-            var graphics = new GameObject("BossVisual", typeof(SpriteRenderer));
-
-            graphics.transform.SetParent(transform, false);
-
-            visual = graphics.GetComponent<SpriteRenderer>();
-
-            visual.sprite = sourceVisual.sprite;
-            visual.sharedMaterial = sourceVisual.sharedMaterial;
-            visual.sortingLayerID = sourceVisual.sortingLayerID;
-            visual.sortingOrder = sourceVisual.sortingOrder;
-
-            combatSortingLayer = sourceVisual.sortingLayerID;
-            combatSortingOrder = sourceVisual.sortingOrder;
-
-            visual.color = sourceVisual.color;
-            visual.flipX = sourceVisual.flipX;
-            visual.flipY = sourceVisual.flipY;
-
-            sourceVisual.enabled = false;
+            combatSortingLayer = visual.sortingLayerID;
+            combatSortingOrder = visual.sortingOrder;
 
             stunnedColliderRadius = hitbox.radius * stunnedColliderScale;
 
@@ -489,6 +473,8 @@ namespace Midterm
             }
 
             State = BossState.Stunned;
+            EndContactProtection();
+            droppedStompFlower = false;
             GameAudio.Play(GameSound.BossImpact);
             timer = stunDuration;
 
@@ -536,19 +522,31 @@ namespace Midterm
 
             if (target != null)
             {
+                if (target.IsDead || !target.isActiveAndEnabled || target.IsControlLocked) return;
                 if (State == BossState.Stunned)
                 {
                     for (int i = 0; i < collision.contactCount; i++)
-                        if (collision.GetContact(i).normal.y < -0.5f && collision.relativeVelocity.y < -0.1f &&
+                        // Restored contacts may report zero after the landing impulse is resolved.
+                        if (collision.GetContact(i).normal.y < -0.5f && collision.relativeVelocity.y <= 0.1f &&
+                            collision.rigidbody.linearVelocity.y <= 0.1f &&
                             target.transform.position.y > transform.position.y)
                         {
                             target.Bounce(stompBounceSpeed);
                             GameAudio.Play(GameSound.Stomp);
+                            DropStompFlower();
                             return;
                         }
                     return;
                 }
-                target.ReceiveEnemyHit(transform.position);
+                target.ReceiveBossHit(transform.position, contactKnockback, contactInvulnerability);
+                if (State == BossState.Charging) FallStunned();
+                if (!target.IsDead && protectedPlayerCollider == null)
+                {
+                    // Damage immunity also prevents the heavy boss from pushing the player.
+                    protectedPlayerCollider = collision.collider;
+                    Physics2D.IgnoreCollision(hitbox, protectedPlayerCollider, true);
+                    contactProtection = StartCoroutine(RestorePlayerContact());
+                }
                 return;
             }
 
@@ -580,6 +578,41 @@ namespace Midterm
                     if (Mathf.Abs(collision.GetContact(i).normal.x) > 0.5f) direction = collision.GetContact(i).normal.x > 0 ? 1 : -1;
         }
 
+
+        System.Collections.IEnumerator RestorePlayerContact()
+        {
+            yield return new WaitForSeconds(contactInvulnerability);
+            RestorePlayerCollision();
+        }
+
+        void RestorePlayerCollision()
+        {
+            if (protectedPlayerCollider != null && hitbox != null)
+                Physics2D.IgnoreCollision(hitbox, protectedPlayerCollider, false);
+            protectedPlayerCollider = null;
+            contactProtection = null;
+        }
+
+        void EndContactProtection()
+        {
+            if (contactProtection != null) StopCoroutine(contactProtection);
+            RestorePlayerCollision();
+        }
+
+        void DropStompFlower()
+        {
+            // CollisionStay and repeated stomps share one reward per stun.
+            if (droppedStompFlower || stompFlowerPrefab == null) return;
+            droppedStompFlower = true;
+
+            Vector3 origin = new Vector3(hitbox.bounds.center.x, hitbox.bounds.max.y, transform.position.z);
+            var flower = Instantiate(stompFlowerPrefab, origin, Quaternion.identity);
+            SceneManager.MoveGameObjectToScene(flower.gameObject, gameObject.scene);
+            var flowerVisual = flower.GetComponent<SpriteRenderer>();
+            flowerVisual.sortingLayerID = visual.sortingLayerID;
+            flowerVisual.sortingOrder = visual.sortingOrder + 1;
+            flower.Emerge(origin + Vector3.up * (flowerVisual.bounds.extents.y + 0.15f), 0.4f);
+        }
 
         void Defeat(float sourceX)
         {
@@ -613,6 +646,15 @@ namespace Midterm
             visual.sortingOrder = 20;
 
             Destroy(gameObject, 4);
+
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+            {
+                var manager = root.GetComponentInChildren<GameManager>();
+                if (manager == null) continue;
+                manager.AddScore(1000);
+                manager.CompleteStage(string.Empty);
+                break;
+            }
         }
 
 
@@ -678,6 +720,7 @@ namespace Midterm
 
         void OnDisable()
         {
+            EndContactProtection();
             ReleaseEntranceLock();
 
             if (impactCamera != null) impactCamera.ClearFocus(transform);

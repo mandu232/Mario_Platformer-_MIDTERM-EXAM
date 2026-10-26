@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 
 namespace Midterm
 {
-    public sealed class EnemyTile : Tile
+    public sealed class EnemyTile : PrefabTile
     {
         // AiCode -------
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
@@ -21,6 +21,7 @@ namespace Midterm
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject instance)
         {
+            base.StartUp(position, tilemap, instance);
             if (!Application.isPlaying || instance == null)
             {
                 return true;

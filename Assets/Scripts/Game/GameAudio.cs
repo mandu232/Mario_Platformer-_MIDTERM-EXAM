@@ -6,7 +6,8 @@ namespace Midterm
     public enum GameSound
     {
         Jump, Stomp, Coin, Upgrade, Fireball, Hit, Box, JumpPad,
-        BossAppear, BossImpact, BossDeath, Clear, FinalClear, Death, EnemyDeath, BlockBreak, FireballBounce
+        BossAppear, BossImpact, BossDeath, Clear, FinalClear, Death, EnemyDeath, BlockBreak, FireballBounce,
+        Checkpoint, SwitchPress
     }
 
     public sealed class GameAudio : MonoBehaviour
@@ -30,6 +31,8 @@ namespace Midterm
         [SerializeField] AudioClip enemyDeath;
         [SerializeField] AudioClip blockBreak;
         [SerializeField] AudioClip fireballBounce;
+        [SerializeField] AudioClip checkpoint;
+        [SerializeField] AudioClip switchPress;
         static GameAudio instance;
 
         // AiCode -------
@@ -73,6 +76,8 @@ namespace Midterm
                 case GameSound.Death: clip = death; isJingle = true; break;
                 case GameSound.EnemyDeath: clip = enemyDeath; break;
                 case GameSound.FireballBounce: clip = fireballBounce; break;
+                case GameSound.Checkpoint: clip = checkpoint; break;
+                case GameSound.SwitchPress: clip = switchPress; break;
                 case GameSound.BlockBreak:
                     if (blockBreak != null) StartCoroutine(PlayBlockBreak());
                     return;

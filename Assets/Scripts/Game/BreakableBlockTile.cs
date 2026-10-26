@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 
 namespace Midterm
 {
-    public sealed class BreakableBlockTile : Tile
+    public sealed class BreakableBlockTile : PrefabTile
     {
         // AiCode -------
         public override void GetTileData(Vector3Int position, ITilemap map, ref TileData data)
@@ -23,6 +23,7 @@ namespace Midterm
 
         public override bool StartUp(Vector3Int position, ITilemap map, GameObject instance)
         {
+            base.StartUp(position, map, instance);
             if (Application.isPlaying && instance != null)
             {
                 instance.GetComponent<BreakableBlock>().BindCell(map.GetComponent<Tilemap>(), position);

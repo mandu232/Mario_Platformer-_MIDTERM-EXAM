@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 
 namespace Midterm
 {
-    public sealed class CoinTile : Tile
+    public sealed class CoinTile : PrefabTile
     {
         // AiCode -------
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
@@ -23,6 +23,7 @@ namespace Midterm
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject instance)
         {
+            base.StartUp(position, tilemap, instance);
             if (Application.isPlaying && instance != null)
             {
                 instance.GetComponent<CoinPickup>().BindCell(tilemap.GetComponent<Tilemap>(), position);

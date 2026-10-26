@@ -32,7 +32,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5362335152437395859}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3244245399404048754
@@ -43,7 +44,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7322426590873099073}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -171,8 +172,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Midterm.FlyingBoss
   player: {fileID: 0}
+  bossHud: {fileID: 0}
+  impactCamera: {fileID: 0}
+  visual: {fileID: 3504780340895005917}
+  emergenceMaskPrefab: {fileID: 5264356139721690320, guid: 2d916da1efb49dd448fdf394c234abc5, type: 3}
+  contactKnockback: {x: 3, y: 4}
+  contactInvulnerability: 2
+  waitForRoomTrigger: 0
+  emergenceDuration: 1.2
+  emergenceShakeStrength: 0.2
   flyingSprite: {fileID: -2403015950268561003, guid: 35623955fa6e472468d47f32052c8e39, type: 3}
   stunnedSprite: {fileID: -4349655835596433054, guid: bdd69a021907f144a859b237ca0b9ec4, type: 3}
+  defeatBlocks: {fileID: 0}
   fireballHitsToDefeat: 10
   flightSpeed: 2
   patrolRadius: 3
@@ -186,3 +197,81 @@ MonoBehaviour:
   recoverySpeed: 4
   fallGravity: 3
   stompBounceSpeed: 10
+  stompFlowerPrefab: {fileID: 5002548554693164813, guid: 54e31aa3f40ae034eb3b61aaaf6dd496, type: 3}
+  airborneColliderScale: 0.8
+  stunnedColliderScale: 0.55
+  groundEmbedDepth: 0.2
+  landingShakeDuration: 0.25
+  landingShakeStrength: 0.22
+  deathShakeDuration: 0.55
+  deathShakeStrength: 0.65
+  damageShakeDuration: 0.22
+  damageShakeAmount: 0.06
+  damageShakeFrequency: 24
+--- !u!1001 &2374973042181532307
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 5881139558114686129}
+    m_Modifications:
+    - target: {fileID: 355851321949989470, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_Name
+      value: BossVisual
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d8504955bb86cdc41a73733884860594, type: 3}
+--- !u!212 &3504780340895005917 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 1177377120071603790, guid: d8504955bb86cdc41a73733884860594, type: 3}
+  m_PrefabInstance: {fileID: 2374973042181532307}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5362335152437395859 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7682945316014058240, guid: d8504955bb86cdc41a73733884860594, type: 3}
+  m_PrefabInstance: {fileID: 2374973042181532307}
+  m_PrefabAsset: {fileID: 0}

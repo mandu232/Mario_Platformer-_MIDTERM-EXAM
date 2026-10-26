@@ -8,13 +8,16 @@ namespace Midterm
     {
         [SerializeField] FlowerPickup itemPrefab;
         [SerializeField] bool givesCoin;
-        [SerializeField] Sprite coinSprite;
+        [SerializeField] SpriteRenderer bumpPrefab;
+        [SerializeField] SpriteRenderer coinPopPrefab;
         [SerializeField] Sprite usedSprite;
 
 
         [SerializeField, Min(0)] float bumpHeight = 0.18f;
         [SerializeField, Min(0.01f)] float bumpDuration = 0.18f;
         [SerializeField, Min(0.01f)] float emergeDuration = 0.4f;
+        [SerializeField, Min(0.01f)] float coinPopDuration = 0.6f;
+        [SerializeField, Min(0)] float coinPopHeight = 1.2f;
 
         public bool IsUsed { get; private set; }
         bool bumping;
@@ -60,7 +63,7 @@ namespace Midterm
                 var manager = FindAnyObjectByType<GameManager>();
 
                 if (manager != null) manager.CollectCoin();
-                if (coinSprite != null) StartCoroutine(PopCoin(visual));
+                if (coinPopPrefab != null) StartCoroutine(PopCoin(visual));
             }
 
             else if (releaseItem && itemPrefab != null)
@@ -78,11 +81,8 @@ namespace Midterm
 
 
 
-            // 임시 자식 오브젝트로 박스가 튀는 모습을 표시
-            //수정필요
-            var bump = new GameObject("BoxBump", typeof(SpriteRenderer));
-            bump.transform.SetParent(transform, false);
-            var bumpVisual = bump.GetComponent<SpriteRenderer>();
+            var bumpVisual = Instantiate(bumpPrefab, transform, false);
+            bumpVisual.gameObject.name = bumpPrefab.name;
 
             bumpVisual.sprite = visual.sprite;
             bumpVisual.sharedMaterial = visual.sharedMaterial;
@@ -95,12 +95,12 @@ namespace Midterm
             while (elapsed < bumpDuration)
             {
                 elapsed += Time.deltaTime;
-                bump.transform.localPosition = Vector3.up * Mathf.Sin(Mathf.Clamp01(elapsed / bumpDuration) * Mathf.PI) * bumpHeight;
+                bumpVisual.transform.localPosition = Vector3.up * Mathf.Sin(Mathf.Clamp01(elapsed / bumpDuration) * Mathf.PI) * bumpHeight;
                 yield return null;
             }
 
             visual.enabled = true;
-            Destroy(bump);
+            Destroy(bumpVisual.gameObject);
             bumping = false;
         }
         // ----------
@@ -112,30 +112,26 @@ namespace Midterm
         IEnumerator PopCoin(SpriteRenderer boxVisual)
         {
             // 중복 획득 방지
-            var coin = new GameObject("BoxCoin", typeof(SpriteRenderer));
-            coin.transform.SetParent(transform, false);
-            var renderer = coin.GetComponent<SpriteRenderer>();
-
-            renderer.sprite = coinSprite;
+            var renderer = Instantiate(coinPopPrefab, transform, false);
             renderer.sharedMaterial = boxVisual.sharedMaterial;
             renderer.sortingLayerID = boxVisual.sortingLayerID;
             renderer.sortingOrder = boxVisual.sortingOrder + 1;
 
             float elapsed = 0;
-            const float duration = 0.6f;
+            float duration = coinPopDuration;
 
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                coin.transform.localPosition = Vector3.up * (0.5f + Mathf.Sin(t * Mathf.PI) * 1.2f);
+                renderer.transform.localPosition = Vector3.up * (0.5f + Mathf.Sin(t * Mathf.PI) * coinPopHeight);
                 var color = Color.white;
                 color.a = Mathf.Clamp01((1 - t) * 4);
                 renderer.color = color;
                 yield return null;
             }
 
-            Destroy(coin);
+            Destroy(renderer.gameObject);
         }
     }
 }

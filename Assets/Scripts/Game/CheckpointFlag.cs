@@ -27,12 +27,14 @@ namespace Midterm
 
         public void SetActivated(bool active)
         {
+            bool newlyActivated = active && !IsActivated;
             IsActivated = active;
             flagVisual.color = poleVisual.color = Color.white;
             poleVisual.enabled = active;
             Vector3 position = flagVisual.transform.localPosition;
             position.y = active ? 1f : 0f;
             flagVisual.transform.localPosition = position;
+            if (newlyActivated) GameAudio.Play(GameSound.Checkpoint);
         }
 
         void Update()
