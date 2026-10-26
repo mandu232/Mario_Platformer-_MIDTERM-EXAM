@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -8435285650344880516, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
+  m_Sprite: {fileID: 1107583881797942885, guid: f559a8812baf93e499e5eaaa253208d2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -153,6 +153,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Midterm.ItemBox
   itemPrefab: {fileID: 6525668112108622421, guid: 1f7fdf0d088c93346b509caa81fc5715, type: 3}
+  givesCoin: 0
+  coinSprite: {fileID: 0}
   usedSprite: {fileID: 3400160013776356846, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
   bumpHeight: 0.18
   bumpDuration: 0.18

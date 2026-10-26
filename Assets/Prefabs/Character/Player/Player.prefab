@@ -185,6 +185,9 @@ MonoBehaviour:
   walkFrames:
   - {fileID: 2575815558344410250, guid: 35623955fa6e472468d47f32052c8e39, type: 3}
   - {fileID: -5481721873124560896, guid: 35623955fa6e472468d47f32052c8e39, type: 3}
+  FireModeFrames:
+  - {fileID: -5736971539918785914, guid: a2ea0bbeaf475ec49b2a6e95acc7318f, type: 3}
+  - {fileID: 5888479439449196405, guid: a2ea0bbeaf475ec49b2a6e95acc7318f, type: 3}
   moveSpeed: 6
   jumpSpeed: 10
   maxJumpHoldTime: 0.2

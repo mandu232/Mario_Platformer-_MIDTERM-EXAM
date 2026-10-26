@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3734949afe9c0b74ab026992659a07d0, type: 3}
   m_Name: CoinItemBox
   m_EditorClassIdentifier: Assembly-CSharp::Midterm.ItemBoxTile
-  m_Sprite: {fileID: -8435285650344880516, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
+  m_Sprite: {fileID: 2376107565742220442, guid: 2ee0276e0f0992945a5fcb240647665e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

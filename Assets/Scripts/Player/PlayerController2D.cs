@@ -6,7 +6,10 @@ namespace Midterm
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D), typeof(SpriteRenderer))]
     public sealed class PlayerController2D : MonoBehaviour
     {
+        
         [SerializeField] Sprite[] walkFrames;
+        [SerializeField] Sprite[] FireModeFrames;
+
         [SerializeField, Min(0)] float moveSpeed = 6f;
         [SerializeField, Min(0)] float jumpSpeed = 10f;
         [SerializeField, Min(0)] float maxJumpHoldTime = 0.2f;
@@ -24,7 +27,15 @@ namespace Midterm
         public bool IsInvulnerable => Time.time < invulnerableUntil;
         public bool IsControlLocked { get; private set; }
         public bool IsDead { get; private set; }
+        public bool IsPoweredUp { get; private set; }
         RigidbodyConstraints2D unlockedConstraints;
+
+        public void GrantFireFlower()
+        {
+            if (IsDead || IsPoweredUp) return;
+            IsPoweredUp = true;
+            animationTime = 0;
+        }
 
         // AiCode -------
         public void SetControlLocked(bool locked)
@@ -105,6 +116,11 @@ namespace Midterm
                 return;
             }
             bool tookDamage = value < CurrentHealth;
+            if (tookDamage && IsPoweredUp)
+            {
+                IsPoweredUp = false;
+                animationTime = 0;
+            }
             CurrentHealth = value;
             if (CurrentHealth == 0) Die();
             else if (tookDamage) GameAudio.Play(GameSound.Hit);
@@ -280,7 +296,9 @@ namespace Midterm
                 color.a *= 0.2f;
             visual.color = color;
             if (horizontal != 0) visual.flipX = horizontal > 0;
-            if (walkFrames == null || walkFrames.Length == 0)
+            Sprite[] frames = IsPoweredUp && FireModeFrames != null && FireModeFrames.Length > 0
+                ? FireModeFrames : walkFrames;
+            if (frames == null || frames.Length == 0)
             {
                 return;
             }
@@ -289,7 +307,7 @@ namespace Midterm
             if (horizontal != 0 && grounded)
             {
                 animationTime += Time.deltaTime;
-                animationTime %= duration * walkFrames.Length;
+                animationTime %= duration * frames.Length;
             }
             else
             {
@@ -303,9 +321,9 @@ namespace Midterm
             }
             else
             {
-                frame = Mathf.Min(1, walkFrames.Length - 1);
+                frame = Mathf.Min(1, frames.Length - 1);
             }
-            Sprite sprite = walkFrames[frame];
+            Sprite sprite = frames[frame];
             if (visual.sprite != sprite) visual.sprite = sprite;
         }
     }

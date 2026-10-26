@@ -11,7 +11,7 @@ namespace Midterm
         PlayerController2D player;
         Collider2D hitbox;
         float nextShot;
-        public bool HasFireFlower { get; private set; }
+        public bool HasFireFlower => player != null && player.IsPoweredUp;
 
         void Awake()
         {
@@ -19,7 +19,7 @@ namespace Midterm
             hitbox = GetComponent<Collider2D>();
         }
 
-        public void GrantFireFlower() => HasFireFlower = true;
+        public void GrantFireFlower() => player.GrantFireFlower();
 
         void Update()
         {
